@@ -60,7 +60,8 @@
         "squizlabs/php_codesniffer": "~2.3",
         "block8/php-docblock-checker": "~1.0",
         "phploc/phploc": "~2.0",
-        "jakub-onderka/php-parallel-lint": "0.8.*"
+        "jakub-onderka/php-parallel-lint": "0.8.*",
+	"sebastian/phpcpd": "2.0.*"
     },
 
     "suggest": {

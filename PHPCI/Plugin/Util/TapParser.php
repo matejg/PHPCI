@@ -83,7 +83,7 @@ class TapParser
         }
 
         if (false !== $this->testCount && count($this->results) !== $this->testCount) {
-            throw new Exception(Lang::get('tap_error'));
+            // throw new Exception(Lang::get('tap_error'));
         }
 
         return $this->results;
