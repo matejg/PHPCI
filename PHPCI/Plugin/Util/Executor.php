@@ -49,7 +49,6 @@ class Executor
      */
     public function executePlugins(&$config, $stage)
     {
-        $success = true;
         $pluginsToExecute = array();
 
         // If we have global plugins to execute for this stage, add them to the list to be executed:
@@ -61,11 +60,11 @@ class Executor
 
         foreach ($pluginsToExecute as $pluginSet) {
             if (!$this->doExecutePlugins($pluginSet, $stage)) {
-                $success = false;
+                return false;
             }
         }
 
-        return $success;
+        return true;
     }
 
     /**
@@ -80,6 +79,15 @@ class Executor
         /** @var \PHPCI\Model\Build $build */
         $build = $this->pluginFactory->getResourceFor('PHPCI\Model\Build');
         $branch = $build->getBranch();
+
+        if (preg_match('@tags/.+@ui', $branch, $m))
+        {
+            $branch = 'tags';
+        }
+        else if (preg_match('@branches/.+@ui', $branch, $m))
+        {
+            $branch = 'branches';
+        }
 
         // If we don't have any branch-specific plugins:
         if (!isset($config['branch-' . $branch][$stage]) || !is_array($config['branch-' . $branch][$stage])) {
