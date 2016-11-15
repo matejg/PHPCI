@@ -86,6 +86,7 @@ class Shell implements \PHPCI\Plugin
         $success = true;
 
         foreach ($this->commands as $command) {
+            $command = $this->replaceVariables($command);
             $command = $this->phpci->interpolate($command);
 
             if (!$this->phpci->executeCommand($command)) {
@@ -95,4 +96,19 @@ class Shell implements \PHPCI\Plugin
 
         return $success;
     }
+
+    private function replaceVariables($command)
+    {
+        $build = $this->build;
+
+        $command = str_replace('%build.commit%', $build->getCommitId(), $command);
+        $command = str_replace('%build.id%', $build->getId(), $command);
+        $command = str_replace('%build.branch%', $build->getBranch(), $command);
+        $command = str_replace('%project.title%', $build->getProject()->getTitle(), $command);
+        $command = str_replace('%date%', date('Y-m-d'), $command);
+        $command = str_replace('%time%', date('Hi'), $command);
+
+        return $command;
+    }
+
 }

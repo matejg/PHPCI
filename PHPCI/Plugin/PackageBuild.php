@@ -73,23 +73,20 @@ class PackageBuild implements \PHPCI\Plugin
             $this->format = [$this->format];
         }
 
-        $this->phpci->executeCommand("mkdir %s", $filename);
-        $this->phpci->executeCommand("mv * %s", $filename);
-
         foreach ($this->format as $format)
         {
             switch ($format)
             {
                 case 'tar':
-                    $cmd = 'tar cfz "%s/%s.tar.gz" %s';
+                    $cmd = 'tar cfz "%s/%s.tar.gz" ./*';
                     break;
                 default:
                 case 'zip':
-                    $cmd = 'zip -rq "%s/%s.zip" %s';
+                    $cmd = 'zip -rq "%s/%s.zip" ./*';
                     break;
             }
 
-            $success = $this->phpci->executeCommand($cmd, $this->directory, $filename, $filename);
+            $success = $this->phpci->executeCommand($cmd, $this->directory, $filename);
         }
 
         chdir($curdir);
