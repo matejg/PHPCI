@@ -83,32 +83,15 @@ class Shell implements \PHPCI\Plugin
             throw new \Exception(Lang::get('shell_not_enabled'));
         }
 
-        $success = true;
-
         foreach ($this->commands as $command) {
-            $command = $this->replaceVariables($command);
             $command = $this->phpci->interpolate($command);
 
             if (!$this->phpci->executeCommand($command)) {
-                $success = false;
+                return false;
             }
         }
 
-        return $success;
-    }
-
-    private function replaceVariables($command)
-    {
-        $build = $this->build;
-
-        $command = str_replace('%build.commit%', $build->getCommitId(), $command);
-        $command = str_replace('%build.id%', $build->getId(), $command);
-        $command = str_replace('%build.branch%', $build->getBranch(), $command);
-        $command = str_replace('%project.title%', $build->getProject()->getTitle(), $command);
-        $command = str_replace('%date%', date('Y-m-d'), $command);
-        $command = str_replace('%time%', date('Hi'), $command);
-
-        return $command;
+        return true;
     }
 
 }
