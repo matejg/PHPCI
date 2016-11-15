@@ -35,7 +35,7 @@ class Builder implements LoggerAwareInterface
     /**
      * @var string[]
      */
-    public $ignore = array();
+    public $ignore = [];
 
     /**
      * @var string
@@ -100,9 +100,9 @@ class Builder implements LoggerAwareInterface
     /**
      * Set up the builder.
      * @param \PHPCI\Model\Build $build
-     * @param LoggerInterface $logger
+     * @param LoggerInterface    $logger
      */
-    public function __construct(Build $build, LoggerInterface $logger = null)
+    public function __construct(Build $build, LoggerInterface $logger = NULL)
     {
         $this->build = $build;
         $this->store = Factory::getStore('Build');
@@ -114,15 +114,16 @@ class Builder implements LoggerAwareInterface
         $this->pluginExecutor = new Plugin\Util\Executor($pluginFactory, $this->buildLogger);
 
         $executorClass = 'PHPCI\Helper\UnixCommandExecutor';
-        if (IS_WIN) {
+        if (IS_WIN)
+        {
             $executorClass = 'PHPCI\Helper\WindowsCommandExecutor';
         }
 
         $this->commandExecutor = new $executorClass(
-            $this->buildLogger,
-            PHPCI_DIR,
-            $this->quiet,
-            $this->verbose
+          $this->buildLogger,
+          PHPCI_DIR,
+          $this->quiet,
+          $this->verbose
         );
 
         $this->interpolator = new BuildInterpolator();
@@ -135,7 +136,8 @@ class Builder implements LoggerAwareInterface
      */
     public function setConfigArray($config)
     {
-        if (is_null($config) || !is_array($config)) {
+        if (is_null($config) || !is_array($config))
+        {
             throw new \Exception(Lang::get('missing_phpci_yml'));
         }
 
@@ -149,9 +151,10 @@ class Builder implements LoggerAwareInterface
      */
     public function getConfig($key)
     {
-        $rtn = null;
+        $rtn = NULL;
 
-        if (isset($this->config[$key])) {
+        if (isset($this->config[$key]))
+        {
             $rtn = $this->config[$key];
         }
 
@@ -192,49 +195,64 @@ class Builder implements LoggerAwareInterface
 
         $previous_state = Build::STATUS_NEW;
 
-        if ($previous_build) {
+        if ($previous_build)
+        {
             $previous_state = $previous_build->getStatus();
         }
 
-        try {
+        try
+        {
             // Set up the build:
             $this->setupBuild();
 
             // Run the core plugin stages:
-            foreach (array('setup', 'test') as $stage) {
+            foreach (['setup', 'test'] as $stage)
+            {
                 $success &= $this->pluginExecutor->executePlugins($this->config, $stage);
             }
 
             // Set the status so this can be used by complete, success and failure
             // stages.
-            if ($success) {
+            if ($success)
+            {
                 $this->build->setStatus(Build::STATUS_SUCCESS);
-            } else {
+            }
+            else
+            {
                 $this->build->setStatus(Build::STATUS_FAILED);
             }
 
 
-            if ($success) {
+            if ($success)
+            {
                 $this->pluginExecutor->executePlugins($this->config, 'success');
 
-                if ($previous_state == Build::STATUS_FAILED) {
+                if ($previous_state == Build::STATUS_FAILED)
+                {
                     $this->pluginExecutor->executePlugins($this->config, 'fixed');
                 }
 
                 $this->buildLogger->logSuccess(Lang::get('build_success'));
-            } else {
+            }
+            else
+            {
                 $this->pluginExecutor->executePlugins($this->config, 'failure');
 
-                if ($previous_state == Build::STATUS_SUCCESS || $previous_state == Build::STATUS_NEW) {
+                if ($previous_state == Build::STATUS_SUCCESS || $previous_state == Build::STATUS_NEW)
+                {
                     $this->pluginExecutor->executePlugins($this->config, 'broken');
                 }
 
                 $this->buildLogger->logFailure(Lang::get('build_failed'));
             }
-        } catch (\Exception $ex) {
+        }
+        catch (\Exception $ex)
+        {
             $this->build->setStatus(Build::STATUS_FAILED);
             $this->buildLogger->logFailure(Lang::get('exception') . $ex->getMessage());
-        }finally{
+        }
+        finally
+        {
             // Complete stage plugins are always run
             $this->pluginExecutor->executePlugins($this->config, 'complete');
         }
@@ -245,8 +263,11 @@ class Builder implements LoggerAwareInterface
         $this->build->setFinished(new \DateTime());
 
         // Clean up:
-        $this->buildLogger->log(Lang::get('removing_build'));
-        $this->build->removeBuildDirectory();
+        if ($this->build->getStatus() == 2)
+        {
+            $this->buildLogger->log(Lang::get('removing_build'));
+            $this->build->removeBuildDirectory();
+        }
 
         $this->store->save($this->build);
     }
@@ -279,7 +300,7 @@ class Builder implements LoggerAwareInterface
     /**
      * Find a binary required by a plugin.
      * @param string $binary
-     * @param bool $quiet
+     * @param bool   $quiet
      *
      * @return null|string
      */
@@ -307,25 +328,28 @@ class Builder implements LoggerAwareInterface
         $this->buildPath = $this->build->getBuildPath();
 
         $this->interpolator->setupInterpolationVars(
-            $this->build,
-            $this->buildPath,
-            PHPCI_URL
+          $this->build,
+          $this->buildPath,
+          PHPCI_URL
         );
 
         $this->commandExecutor->setBuildPath($this->buildPath);
 
         // Create a working copy of the project:
-        if (!$this->build->createWorkingCopy($this, $this->buildPath)) {
+        if (!$this->build->createWorkingCopy($this, $this->buildPath))
+        {
             throw new \Exception(Lang::get('could_not_create_working'));
         }
 
         // Does the project's phpci.yml request verbose mode?
-        if (!isset($this->config['build_settings']['verbose']) || !$this->config['build_settings']['verbose']) {
+        if (!isset($this->config['build_settings']['verbose']) || !$this->config['build_settings']['verbose'])
+        {
             $this->verbose = false;
         }
 
         // Does the project have any paths it wants plugins to ignore?
-        if (isset($this->config['build_settings']['ignore'])) {
+        if (isset($this->config['build_settings']['ignore']))
+        {
             $this->ignore = $this->config['build_settings']['ignore'];
         }
 
@@ -346,16 +370,16 @@ class Builder implements LoggerAwareInterface
 
     /**
      * Write to the build log.
-     * @param $message
+     * @param        $message
      * @param string $level
-     * @param array $context
+     * @param array  $context
      */
-    public function log($message, $level = LogLevel::INFO, $context = array())
+    public function log($message, $level = LogLevel::INFO, $context = [])
     {
         $this->buildLogger->log($message, $level, $context);
     }
 
-   /**
+    /**
      * Add a success-coloured message to the log.
      * @param string
      */
@@ -366,13 +390,14 @@ class Builder implements LoggerAwareInterface
 
     /**
      * Add a failure-coloured message to the log.
-     * @param string $message
+     * @param string     $message
      * @param \Exception $exception The exception that caused the error.
      */
-    public function logFailure($message, \Exception $exception = null)
+    public function logFailure($message, \Exception $exception = NULL)
     {
         $this->buildLogger->logFailure($message, $exception);
     }
+
     /**
      * Returns a configured instance of the plugin factory.
      *
@@ -385,37 +410,41 @@ class Builder implements LoggerAwareInterface
 
         $self = $this;
         $pluginFactory->registerResource(
-            function () use ($self) {
-                return $self;
-            },
-            null,
-            'PHPCI\Builder'
+          function () use ($self)
+          {
+              return $self;
+          },
+          NULL,
+          'PHPCI\Builder'
         );
 
         $pluginFactory->registerResource(
-            function () use ($build) {
-                return $build;
-            },
-            null,
-            'PHPCI\Model\Build'
+          function () use ($build)
+          {
+              return $build;
+          },
+          NULL,
+          'PHPCI\Model\Build'
         );
 
         $logger = $this->logger;
         $pluginFactory->registerResource(
-            function () use ($logger) {
-                return $logger;
-            },
-            null,
-            'Psr\Log\LoggerInterface'
+          function () use ($logger)
+          {
+              return $logger;
+          },
+          NULL,
+          'Psr\Log\LoggerInterface'
         );
 
         $pluginFactory->registerResource(
-            function () use ($self) {
-                $factory = new MailerFactory($self->getSystemConfig('phpci'));
-                return $factory->getSwiftMailerFromConfig();
-            },
-            null,
-            'Swift_Mailer'
+          function () use ($self)
+          {
+              $factory = new MailerFactory($self->getSystemConfig('phpci'));
+              return $factory->getSwiftMailerFromConfig();
+          },
+          NULL,
+          'Swift_Mailer'
         );
 
         return $pluginFactory;
