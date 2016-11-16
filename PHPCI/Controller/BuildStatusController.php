@@ -18,15 +18,16 @@ use PHPCI\Model\Build;
 use PHPCI\Service\BuildStatusService;
 
 /**
-* Build Status Controller - Allows external access to build status information / images.
-* @author       Dan Cryer <dan@block8.co.uk>
-* @package      PHPCI
-* @subpackage   Web
-*/
+ * Build Status Controller - Allows external access to build status information / images.
+ * @author       Dan Cryer <dan@block8.co.uk>
+ * @package      PHPCI
+ * @subpackage   Web
+ */
 class BuildStatusController extends \PHPCI\Controller
 {
     /* @var \PHPCI\Store\ProjectStore */
     protected $projectStore;
+
     /* @var \PHPCI\Store\BuildStore */
     protected $buildStore;
 
@@ -36,8 +37,8 @@ class BuildStatusController extends \PHPCI\Controller
     public function init()
     {
         $this->response->disableLayout();
-        $this->buildStore      = Store\Factory::getStore('Build');
-        $this->projectStore    = Store\Factory::getStore('Project');
+        $this->buildStore = Store\Factory::getStore('Build');
+        $this->projectStore = Store\Factory::getStore('Project');
     }
 
     /**
@@ -48,22 +49,28 @@ class BuildStatusController extends \PHPCI\Controller
     protected function getStatus($projectId)
     {
         $branch = $this->getParam('branch', 'master');
-        try {
+        try
+        {
             $project = $this->projectStore->getById($projectId);
             $status = 'passing';
 
-            if (!$project->getAllowPublicStatus()) {
-                return null;
+            if (!$project->getAllowPublicStatus())
+            {
+                return NULL;
             }
 
-            if (isset($project) && $project instanceof Project) {
-                $build = $project->getLatestBuild($branch, array(2,3));
+            if (isset($project) && $project instanceof Project)
+            {
+                $build = $project->getLatestBuild($branch, [2, 3]);
 
-                if (isset($build) && $build instanceof Build && $build->getStatus() != 2) {
+                if (isset($build) && $build instanceof Build && $build->getStatus() != 2)
+                {
                     $status = 'failed';
                 }
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             $status = 'error';
         }
 
@@ -84,27 +91,35 @@ class BuildStatusController extends \PHPCI\Controller
         $project = $this->projectStore->getById($projectId);
         $xml = new \SimpleXMLElement('<Projects/>');
 
-        if (!$project instanceof Project || !$project->getAllowPublicStatus()) {
+        if (!$project instanceof Project || !$project->getAllowPublicStatus())
+        {
             return $this->renderXml($xml);
         }
 
-        try {
+        try
+        {
             $branchList = $this->buildStore->getBuildBranches($projectId);
 
-            if (!$branchList) {
-                $branchList = array($project->getBranch());
+            if (!$branchList)
+            {
+                $branchList = [$project->getBranch()];
             }
 
-            foreach ($branchList as $branch) {
+            foreach ($branchList as $branch)
+            {
                 $buildStatusService = new BuildStatusService($branch, $project, $project->getLatestBuild($branch));
-                if ($attributes = $buildStatusService->toArray()) {
+                if ($attributes = $buildStatusService->toArray())
+                {
                     $projectXml = $xml->addChild('Project');
-                    foreach ($attributes as $attributeKey => $attributeValue) {
+                    foreach ($attributes as $attributeKey => $attributeValue)
+                    {
                         $projectXml->addAttribute($attributeKey, $attributeValue);
                     }
                 }
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e)
+        {
             $xml = new \SimpleXMLElement('<projects/>');
         }
 
@@ -115,7 +130,7 @@ class BuildStatusController extends \PHPCI\Controller
      * @param \SimpleXMLElement $xml
      * @return bool
      */
-    protected function renderXml(\SimpleXMLElement $xml = null)
+    protected function renderXml(\SimpleXMLElement $xml = NULL)
     {
         $this->response->setHeader('Content-Type', 'text/xml');
         $this->response->setContent($xml->asXML());
@@ -126,8 +141,8 @@ class BuildStatusController extends \PHPCI\Controller
     }
 
     /**
-    * Returns the appropriate build status image in SVG format for a given project.
-    */
+     * Returns the appropriate build status image in SVG format for a given project.
+     */
     public function image($projectId)
     {
         $style = $this->getParam('style', 'plastic');
@@ -135,7 +150,8 @@ class BuildStatusController extends \PHPCI\Controller
 
         $status = $this->getStatus($projectId);
 
-        if (is_null($status)) {
+        if (is_null($status))
+        {
             $response = new b8\Http\Response\RedirectResponse();
             $response->setHeader('Location', '/');
             return $response;
@@ -143,11 +159,11 @@ class BuildStatusController extends \PHPCI\Controller
 
         $color = ($status == 'passing') ? 'green' : 'red';
         $image = file_get_contents(sprintf(
-            'http://img.shields.io/badge/%s-%s-%s.svg?style=%s',
-            $label,
-            $status,
-            $color,
-            $style
+          'http://img.shields.io/badge/%s-%s-%s.svg?style=%s',
+          $label,
+          $status,
+          $color,
+          $style
         ));
 
         $this->response->disableLayout();
@@ -166,17 +182,20 @@ class BuildStatusController extends \PHPCI\Controller
     {
         $project = $this->projectStore->getById($projectId);
 
-        if (empty($project)) {
+        if (empty($project))
+        {
             throw new NotFoundException('Project with id: ' . $projectId . ' not found');
         }
 
-        if (!$project->getAllowPublicStatus()) {
+        if (!$project->getAllowPublicStatus())
+        {
             throw new NotFoundException('Project with id: ' . $projectId . ' not found');
         }
 
         $builds = $this->getLatestBuilds($projectId);
 
-        if (count($builds)) {
+        if (count($builds))
+        {
             $this->view->latest = $builds[0];
         }
 
@@ -191,11 +210,12 @@ class BuildStatusController extends \PHPCI\Controller
      */
     protected function getLatestBuilds($projectId)
     {
-        $criteria       = array('project_id' => $projectId);
-        $order          = array('id' => 'DESC');
-        $builds         = $this->buildStore->getWhere($criteria, 10, 0, array(), $order);
+        $criteria = ['project_id' => $projectId];
+        $order = ['id' => 'DESC'];
+        $builds = $this->buildStore->getWhere($criteria, 10, 0, [], $order);
 
-        foreach ($builds['items'] as &$build) {
+        foreach ($builds['items'] as &$build)
+        {
             $build = BuildFactory::getBuild($build);
         }
 
