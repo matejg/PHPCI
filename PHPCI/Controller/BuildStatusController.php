@@ -49,95 +49,46 @@ class BuildStatusController extends \PHPCI\Controller
     protected function getStatus($projectId)
     {
         $branch = $this->getParam('branch', 'master');
+        $commitId = $this->getParam('commitId', NULL);
+
         try
         {
             $project = $this->projectStore->getById($projectId);
-            $status = 'passing';
+            if (!$project)
+            {
+                return NULL;
+            }
 
             if (!$project->getAllowPublicStatus())
             {
                 return NULL;
             }
 
-            if (isset($project) && $project instanceof Project)
-            {
-                $build = $project->getLatestBuild($branch, [2, 3]);
 
-                if (isset($build) && $build instanceof Build && $build->getStatus() != 2)
-                {
-                    $status = 'failed';
-                }
+            $build = $project->getLatestBuild($branch, NULL, $commitId);
+            if (!$build)
+            {
+                return 'new-lightgrey';
+            }
+
+            switch ($build->getStatus())
+            {
+                case 0:
+                    return 'pending-blue';
+                case 1:
+                    return 'running-yellow';
+                case 2:
+                    return 'passing-green';
+                case 3:
+                    return 'failed-red';
+                default:
+                    return 'error-red';
             }
         }
         catch (\Exception $e)
         {
-            $status = 'error';
+            return 'error-red';
         }
-
-        return $status;
-    }
-
-    /**
-     * Displays projects information in ccmenu format
-     *
-     * @param $projectId
-     * @return bool
-     * @throws \Exception
-     * @throws b8\Exception\HttpException
-     */
-    public function ccxml($projectId)
-    {
-        /* @var Project $project */
-        $project = $this->projectStore->getById($projectId);
-        $xml = new \SimpleXMLElement('<Projects/>');
-
-        if (!$project instanceof Project || !$project->getAllowPublicStatus())
-        {
-            return $this->renderXml($xml);
-        }
-
-        try
-        {
-            $branchList = $this->buildStore->getBuildBranches($projectId);
-
-            if (!$branchList)
-            {
-                $branchList = [$project->getBranch()];
-            }
-
-            foreach ($branchList as $branch)
-            {
-                $buildStatusService = new BuildStatusService($branch, $project, $project->getLatestBuild($branch));
-                if ($attributes = $buildStatusService->toArray())
-                {
-                    $projectXml = $xml->addChild('Project');
-                    foreach ($attributes as $attributeKey => $attributeValue)
-                    {
-                        $projectXml->addAttribute($attributeKey, $attributeValue);
-                    }
-                }
-            }
-        }
-        catch (\Exception $e)
-        {
-            $xml = new \SimpleXMLElement('<projects/>');
-        }
-
-        return $this->renderXml($xml);
-    }
-
-    /**
-     * @param \SimpleXMLElement $xml
-     * @return bool
-     */
-    protected function renderXml(\SimpleXMLElement $xml = NULL)
-    {
-        $this->response->setHeader('Content-Type', 'text/xml');
-        $this->response->setContent($xml->asXML());
-        $this->response->flush();
-        echo $xml->asXML();
-
-        return true;
     }
 
     /**
@@ -145,9 +96,6 @@ class BuildStatusController extends \PHPCI\Controller
      */
     public function image($projectId)
     {
-        $style = $this->getParam('style', 'plastic');
-        $label = $this->getParam('label', 'build');
-
         $status = $this->getStatus($projectId);
 
         if (is_null($status))
@@ -157,14 +105,7 @@ class BuildStatusController extends \PHPCI\Controller
             return $response;
         }
 
-        $color = ($status == 'passing') ? 'green' : 'red';
-        $image = file_get_contents(sprintf(
-          'http://img.shields.io/badge/%s-%s-%s.svg?style=%s',
-          $label,
-          $status,
-          $color,
-          $style
-        ));
+        $image = file_get_contents(__DIR__ . '/../../public/assets/badge/build-' . $status . '.svg');
 
         $this->response->disableLayout();
         $this->response->setHeader('Content-Type', 'image/svg+xml');
