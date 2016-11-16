@@ -138,8 +138,6 @@ class Executor
      */
     protected function doExecutePlugins(&$plugins, $stage)
     {
-        $success = true;
-
         foreach ($plugins as $plugin => $options) {
             $this->logger->log(Lang::get('running_plugin', $plugin));
 
@@ -155,21 +153,13 @@ class Executor
                 $this->logger->logFailure(Lang::get('plugin_failed'));
                 $this->setPluginStatus($stage, $plugin, Build::STATUS_FAILED);
 
-                if ($stage === 'setup') {
-                    // If we're in the "setup" stage, execution should not continue after
-                    // a plugin has failed:
-                    throw new Exception('Plugin failed: ' . $plugin);
-                } elseif ($stage === 'test') {
-                    // If we're in the "test" stage and the plugin is not allowed to fail,
-                    // then mark the build as failed:
-                    if (empty($options['allow_failures'])) {
-                        $success = false;
-                    }
+                if (empty($options['allow_failures'])) {
+                    return false;
                 }
             }
         }
 
-        return $success;
+        return true;
     }
 
     /**
