@@ -37,9 +37,10 @@ class SubversionBuild extends Build
 
         if (empty($branch) || $branch == 'trunk') {
             $url .= 'trunk';
+        } elseif (preg_match('@tags?\-(.+)@', $branch, $m)) {
+            $url .= 'tags/' . $m[1];
         } else {
-            //$url .= 'branches/' . $branch;
-            $url .= $branch;
+            $url .= 'branches/' . $branch;
         }
 
         return $url;
