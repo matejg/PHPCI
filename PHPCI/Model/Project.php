@@ -26,14 +26,19 @@ class Project extends ProjectBase
      * Return the latest build from a specific branch, of a specific status, for this project.
      * @param string $branch
      * @param null $status
+     * @param null $commitId
      * @return mixed|null
      */
-    public function getLatestBuild($branch = 'master', $status = null)
+    public function getLatestBuild($branch = 'master', $status = null, $commitId = NULL)
     {
         $criteria       = array('branch' => $branch, 'project_id' => $this->getId());
 
         if (isset($status)) {
             $criteria['status'] = $status;
+        }
+
+        if (isset($commitId)) {
+            $criteria['commit_id'] = $commitId;
         }
 
         $order          = array('id' => 'DESC');
