@@ -90,12 +90,12 @@ class Executor
         }
 
         // If we don't have any branch-specific plugins:
-        if (!isset($config['branch-' . $branch][$stage]) || !is_array($config['branch-' . $branch][$stage])) {
+        if (!isset($config[$branch][$stage]) || !is_array($config[$branch][$stage])) {
             return $pluginsToExecute;
         }
 
         // If we have branch-specific plugins to execute, add them to the list to be executed:
-        $branchConfig = $config['branch-' . $branch];
+        $branchConfig = $config[$branch];
         $plugins = $branchConfig[$stage];
 
         $runOption = 'after';
