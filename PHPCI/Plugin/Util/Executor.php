@@ -80,11 +80,11 @@ class Executor
         $build = $this->pluginFactory->getResourceFor('PHPCI\Model\Build');
         $branch = $build->getBranch();
 
-        if (preg_match('@tags/.+@ui', $branch, $m))
+        if (preg_match('@tags?\-.+@ui', $branch))
         {
             $branch = 'tags';
         }
-        else if (preg_match('@branches/.+@ui', $branch, $m))
+        else if ($branch != 'trunk')
         {
             $branch = 'branches';
         }
