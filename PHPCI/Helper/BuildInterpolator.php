@@ -23,11 +23,11 @@ class BuildInterpolator
      * @var mixed[]
      * @see setupInterpolationVars()
      */
-    protected $interpolation_vars = array();
+    protected $interpolation_vars = [];
 
     /**
      * Sets the variables that will be used for interpolation.
-     * @param Build $build
+     * @param Build  $build
      * @param string $buildPath
      * @param string $phpCiUrl
      */
@@ -39,10 +39,10 @@ class BuildInterpolator
             $tag = $m[1];
         }
 
-        $this->interpolation_vars = array();
+        $this->interpolation_vars = [];
         $this->interpolation_vars['%TAG%'] = $tag;
         $this->interpolation_vars['%DATE%'] = date("Y-m-d");
-        $this->interpolation_vars['%DATETIME%'] = date("Y-m-d-HM");
+        $this->interpolation_vars['%DATETIME%'] = date("Y-m-d-Hi");
         $this->interpolation_vars['%PHPCI%'] = 1;
         $this->interpolation_vars['%COMMIT%'] = $build->getCommitId();
         $this->interpolation_vars['%SHORT_COMMIT%'] = substr($build->getCommitId(), 0, 7);
