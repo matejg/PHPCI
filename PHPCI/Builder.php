@@ -229,22 +229,23 @@ class Builder implements LoggerAwareInterface
 
             if ($success)
             {
-                $this->pluginExecutor->executePlugins($this->config, 'success');
+                $success = $this->pluginExecutor->executePlugins($this->config, 'success');
 
-                if ($previous_state == Build::STATUS_FAILED)
+                if ($success && $previous_state == Build::STATUS_FAILED)
                 {
-                    $this->pluginExecutor->executePlugins($this->config, 'fixed');
+                    $success = $this->pluginExecutor->executePlugins($this->config, 'fixed');
                 }
 
                 $this->buildLogger->logSuccess(Lang::get('build_success'));
             }
-            else
-            {
-                $this->pluginExecutor->executePlugins($this->config, 'failure');
 
-                if ($previous_state == Build::STATUS_SUCCESS || $previous_state == Build::STATUS_NEW)
+            if (!$success)
+            {
+                $success = $this->pluginExecutor->executePlugins($this->config, 'failure');
+
+                if ($success && ($previous_state == Build::STATUS_SUCCESS || $previous_state == Build::STATUS_NEW))
                 {
-                    $this->pluginExecutor->executePlugins($this->config, 'broken');
+                    $success = $this->pluginExecutor->executePlugins($this->config, 'broken');
                 }
 
                 $this->buildLogger->logFailure(Lang::get('build_failed'));
