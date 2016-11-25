@@ -33,7 +33,16 @@ class BuildInterpolator
      */
     public function setupInterpolationVars(Build $build, $buildPath, $phpCiUrl)
     {
+        $tag = '';
+        if (preg_match('@tags?-(.+)@ui', $build->getBranch(), $m))
+        {
+            $tag = $m[1];
+        }
+
         $this->interpolation_vars = array();
+        $this->interpolation_vars['%TAG%'] = $tag;
+        $this->interpolation_vars['%DATE%'] = date("Y-m-d");
+        $this->interpolation_vars['%DATETIME%'] = date("Y-m-d-HM");
         $this->interpolation_vars['%PHPCI%'] = 1;
         $this->interpolation_vars['%COMMIT%'] = $build->getCommitId();
         $this->interpolation_vars['%SHORT_COMMIT%'] = substr($build->getCommitId(), 0, 7);
