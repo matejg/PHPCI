@@ -226,7 +226,6 @@ class Builder implements LoggerAwareInterface
                 $this->build->setStatus(Build::STATUS_FAILED);
             }
 
-
             if ($success)
             {
                 $success = $this->pluginExecutor->executePlugins($this->config, 'success');
@@ -234,6 +233,11 @@ class Builder implements LoggerAwareInterface
                 if ($success && $previous_state == Build::STATUS_FAILED)
                 {
                     $success = $this->pluginExecutor->executePlugins($this->config, 'fixed');
+                }
+
+                if (!$success)
+                {
+                    $this->build->setStatus(Build::STATUS_FAILED);
                 }
 
                 $this->buildLogger->logSuccess(Lang::get('build_success'));
