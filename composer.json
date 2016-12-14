@@ -1,39 +1,45 @@
 {
-    "name"             : "block8/phpci",
-    "description"      : "Simple continuous integration for PHP projects.",
+    "name": "block8/phpci",
+    "description": "Simple continuous integration for PHP projects.",
     "minimum-stability": "stable",
-    "type"             : "library",
-    "keywords"         : ["php", "phpci", "ci", "continuous", "integration", "testing", "phpunit", "continuous integration", "jenkins", "travis"],
-    "homepage"         : "http://www.phptesting.org/",
-    "license"          : "BSD-2-Clause",
-
+    "type": "library",
+    "keywords": [
+        "php",
+        "phpci",
+        "ci",
+        "continuous",
+        "integration",
+        "testing",
+        "phpunit",
+        "continuous integration",
+        "jenkins",
+        "travis"
+    ],
+    "homepage": "http://www.phptesting.org/",
+    "license": "BSD-2-Clause",
     "authors": [
         {
-            "name"    : "Dan Cryer",
-            "email"   : "dan.cryer@block8.co.uk",
+            "name": "Dan Cryer",
+            "email": "dan.cryer@block8.co.uk",
             "homepage": "http://www.block8.co.uk",
-            "role"    : "Developer"
+            "role": "Developer"
         }
     ],
-
     "support": {
-        "email" : "hello+phpci@block8.co.uk",
+        "email": "hello+phpci@block8.co.uk",
         "issues": "https://github.com/Block8/PHPCI/issues",
         "source": "https://github.com/Block8/PHPCI"
     },
-
     "autoload": {
         "psr-4": {
             "PHPCI\\": "PHPCI"
         }
     },
-
     "autoload-dev": {
         "psr-4": {
             "Tests\\PHPCI\\": "Tests/PHPCI/"
         }
     },
-
     "require": {
         "php": ">=5.3.8",
         "ext-pdo": "*",
@@ -53,7 +59,6 @@
         "hipchat/hipchat-php": "~1.4",
         "mremi/flowdock": "~1.0"
     },
-
     "require-dev": {
         "phpunit/phpunit": "~4.5",
         "phpmd/phpmd": "~2.0",
@@ -61,9 +66,9 @@
         "block8/php-docblock-checker": "~1.0",
         "phploc/phploc": "~2.0",
         "jakub-onderka/php-parallel-lint": "0.8.*",
-	"sebastian/phpcpd": "2.0.*"
+        "sebastian/phpcpd": "2.0.*",
+        "phing/phing": "2.*"
     },
-
     "suggest": {
         "block8/php-docblock-checker": "PHP Docblock Checker",
         "phpmd/phpmd": "PHP Mess Detector",
