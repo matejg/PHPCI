@@ -134,6 +134,8 @@ class TechnicalDebt implements PHPCI\Plugin, PHPCI\ZeroConfigPlugin
             $success = false;
         }
 
+        $this->phpci->logExecOutput(true);
+
         return $success;
     }
 
