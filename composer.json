@@ -60,8 +60,8 @@
         "mremi/flowdock": "~1.0"
     },
     "require-dev": {
-        "phpstan/phpstan": "^0.5",
-        "phpstan/phpstan-nette": "^0.5",
+        "phpstan/phpstan": "*",
+        "phpstan/phpstan-nette": "*",
         "phpunit/phpunit": "~4.5",
         "phpmd/phpmd": "~2.0",
         "squizlabs/php_codesniffer": "~2.3",
