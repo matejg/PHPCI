@@ -62,6 +62,7 @@
     "require-dev": {
         "phpstan/phpstan": "*",
         "phpstan/phpstan-nette": "*",
+        "phpstan/phpstan-doctrine": "*",
         "phpunit/phpunit": "~4.5",
         "phpmd/phpmd": "~2.0",
         "squizlabs/php_codesniffer": "~2.3",
